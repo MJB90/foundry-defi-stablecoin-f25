@@ -26,9 +26,10 @@
 pragma solidity ^0.8.18;
 
 contract DSCEngine {
+
     function depositCollateralAndMintDsc() external {}
 
-    function depositCollateral() external {}
+    function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral) external {}
 
     function redeemCollateralAndBurnDsc() external {}
 
