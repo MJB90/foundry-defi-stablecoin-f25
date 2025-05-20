@@ -204,6 +204,15 @@ contract DSCEngine is ReentrancyGuard {
     //                            Internal Functions
     ////////////////////////////////////////////////////////////////////
 
+    function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to) private{
+        s_collateralDeposited[msg.sender][tokenCollateralAddress] -= amountCollateral;
+        emit CollateralRedeemed(msg.sender, tokenCollateralAddress, amountCollateral);
+        bool success = IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
+        if (!success) {
+            revert DSCEngine_TransferFailed();
+        }
+    }
+
     function _getUserAccountData(address user)
         internal
         view
