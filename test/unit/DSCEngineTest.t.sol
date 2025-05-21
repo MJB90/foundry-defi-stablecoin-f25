@@ -23,7 +23,7 @@ contract DSCEngineTest is Test {
     function setUp() public {
         DeployDSC deployer = new DeployDSC();
         (s_dscEngine, s_dsc, s_helperConfig) = deployer.run();
-        (wethUsdPriceFeed,wbtcUsdPriceFeed, weth,wbtc,,) = s_helperConfig.activeNetworkConfig();
+        (wethUsdPriceFeed, wbtcUsdPriceFeed, weth, wbtc,,) = s_helperConfig.activeNetworkConfig();
         ERC20Mock(weth).mint(USER, STARTING_ERC20_BALANCE);
     }
 
@@ -82,7 +82,7 @@ contract DSCEngineTest is Test {
         _;
     }
 
-    function testCanDepositCollateralAndGetAccountInfo() public depositedCollateral{
+    function testCanDepositCollateralAndGetAccountInfo() public depositedCollateral {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = s_dscEngine.getAccountInformation(USER);
         uint256 expectedTotalDscMinted = 0;
         uint256 expectedDepositAmountInEth = s_dscEngine.getTokenAmountFromUsd(weth, collateralValueInUsd);

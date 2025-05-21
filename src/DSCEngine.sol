@@ -195,7 +195,7 @@ contract DSCEngine is ReentrancyGuard {
         // We need to burn the DSC
         _burnDsc(debtToCover, user, msg.sender);
         uint256 endingUserHealthFactor = _healthFactor(user);
-        if(endingUserHealthFactor <= startingUserHealthFactor) {
+        if (endingUserHealthFactor <= startingUserHealthFactor) {
             revert DSCEngine_HealthFactorNotImproved();
         }
         //Revert if it ruined the liquidator's health factor
@@ -274,7 +274,11 @@ contract DSCEngine is ReentrancyGuard {
         return ((uint256(uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION);
     }
 
-    function getAccountInformation(address user) external view returns (uint256 totalDscMinted, uint256 totalCollateralValue) {
+    function getAccountInformation(address user)
+        external
+        view
+        returns (uint256 totalDscMinted, uint256 totalCollateralValue)
+    {
         (totalDscMinted, totalCollateralValue) = _getUserAccountData(user);
     }
 }
