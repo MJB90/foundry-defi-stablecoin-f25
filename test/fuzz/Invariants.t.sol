@@ -13,6 +13,7 @@ import {DeployDSC} from "../../script/DeployDSC.s.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Handler} from "./Handler.t.sol";
 
 contract Invariants is StdInvariant, Test {
     DeployDSC deployer;
@@ -24,12 +25,14 @@ contract Invariants is StdInvariant, Test {
     address weth;
     address wbtc;
     address public USER = makeAddr("user");
+    Handler public handler;
 
     function setUp() external {
         deployer = new DeployDSC();
         (s_dscEngine, s_dsc, s_helperConfig) = deployer.run();
         (wethUsdPriceFeed, wbtcUsdPriceFeed, weth, wbtc,,) = s_helperConfig.activeNetworkConfig();
-        targetContract(address(s_dscEngine));
+        handler = new Handler(s_dscEngine, s_dsc);
+        targetContract(address(handler));
     }
 
     function invariant_protocolMustHaveMoreValueThanTotalSupply() public view {
