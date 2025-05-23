@@ -22,6 +22,23 @@ contract Handler is Test {
         wbtc = collateralTokens[1];
     }
 
+    function mintDsc(uint256 amountDsc) public {
+        vm.startPrank(msg.sender);
+        (uint256 totalDscMinted, uint256 totalCollateralValue) = s_dscEngine.getAccountInformation(msg.sender);
+        int256 maxDscToMint = (int256(totalCollateralValue) / 3) - int256(totalDscMinted); // 50% collateralization ratio
+        if (maxDscToMint < 0) {
+            vm.stopPrank(); // Ensure prank is stopped if we return early
+            return;
+        }
+        amountDsc = bound(amountDsc, 0, uint256(maxDscToMint));
+        if (amountDsc == 0) {
+            vm.stopPrank(); // Ensure prank is stopped if we return early
+            return;
+        }
+        s_dscEngine.mintDsc(amountDsc);
+        vm.stopPrank();
+    }
+
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         address collateralAddress = _getCollateralFromSeed(collateralSeed);
         amountCollateral = bound(amountCollateral, 1, MAX_DEPOSIT_SIZE);
@@ -36,6 +53,24 @@ contract Handler is Test {
         ERC20Mock(collateralAddress).mint(msg.sender, amountCollateral);
         ERC20Mock(collateralAddress).approve(address(s_dscEngine), amountCollateral);
         s_dscEngine.depositCollateral(collateralAddress, amountCollateral);
+        vm.stopPrank();
+    }
+
+    function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
+        address collateralAddress = _getCollateralFromSeed(collateralSeed);
+
+        // We need to prank as the EOA that originally deposited the collateral.
+        // The fuzzer sets msg.sender for calls to Handler's public functions.
+        vm.startPrank(msg.sender);
+
+        uint256 maxCollateralToRedeem = s_dscEngine.getCollateralBalanceOfUser(msg.sender, collateralAddress);
+        amountCollateral = bound(amountCollateral, 0, maxCollateralToRedeem);
+
+        if (amountCollateral == 0) {
+            vm.stopPrank(); // Ensure prank is stopped if we return early
+            return;
+        }
+        s_dscEngine.redeemCollateral(collateralAddress, amountCollateral);
         vm.stopPrank();
     }
 
