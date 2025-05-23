@@ -42,6 +42,10 @@ contract Invariants is StdInvariant, Test {
 
         uint256 totalCollateralValue =
             s_dscEngine.getUsdValue(weth, totalWethDeposited) + s_dscEngine.getUsdValue(wbtc, totalWbtcDeposited);
+
+        // console.log("Times Mint DSC Called: ", handler.timesMintDscCalled);
+        // Try logging only the value to debug the issue
+        console.log("Times Mint DSC Called: ", handler.timesMintDscCalled());
         assert(totalCollateralValue >= totalSupply);
     }
 }

@@ -13,6 +13,8 @@ contract Handler is Test {
     address public weth;
     address public wbtc;
     uint256 MAX_DEPOSIT_SIZE = type(uint96).max;
+    uint256 public timesMintDscCalled = 0;
+    address[] public addressWithCollateralDeposited;
 
     constructor(DSCEngine dscEngine, DecentralizedStableCoin dsc) {
         s_dscEngine = dscEngine;
@@ -22,9 +24,13 @@ contract Handler is Test {
         wbtc = collateralTokens[1];
     }
 
-    function mintDsc(uint256 amountDsc) public {
-        vm.startPrank(msg.sender);
-        (uint256 totalDscMinted, uint256 totalCollateralValue) = s_dscEngine.getAccountInformation(msg.sender);
+    function mintDsc(uint256 amountDsc, uint256 addressCollateralSeed) public {
+        if (addressWithCollateralDeposited.length == 0) {
+            return; // No addresses with collateral deposited
+        }
+        address sender = addressWithCollateralDeposited[addressCollateralSeed % addressWithCollateralDeposited.length];
+        vm.startPrank(sender);
+        (uint256 totalDscMinted, uint256 totalCollateralValue) = s_dscEngine.getAccountInformation(sender);
         int256 maxDscToMint = (int256(totalCollateralValue) / 3) - int256(totalDscMinted); // 50% collateralization ratio
         if (maxDscToMint < 0) {
             vm.stopPrank(); // Ensure prank is stopped if we return early
@@ -39,6 +45,7 @@ contract Handler is Test {
         console.log("Minting DSC: ", amountDsc);
         s_dscEngine.mintDsc(amountDsc);
         vm.stopPrank();
+        timesMintDscCalled++;
     }
 
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
@@ -57,6 +64,7 @@ contract Handler is Test {
         console.log("Depositing Collateral: ", amountCollateral);
         s_dscEngine.depositCollateral(collateralAddress, amountCollateral);
         vm.stopPrank();
+        addressWithCollateralDeposited.push(msg.sender);
     }
 
     function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
