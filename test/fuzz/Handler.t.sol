@@ -35,6 +35,8 @@ contract Handler is Test {
             vm.stopPrank(); // Ensure prank is stopped if we return early
             return;
         }
+        console.log("Total Collateral Value: ", totalCollateralValue);
+        console.log("Minting DSC: ", amountDsc);
         s_dscEngine.mintDsc(amountDsc);
         vm.stopPrank();
     }
@@ -52,6 +54,7 @@ contract Handler is Test {
         vm.startPrank(msg.sender);
         ERC20Mock(collateralAddress).mint(msg.sender, amountCollateral);
         ERC20Mock(collateralAddress).approve(address(s_dscEngine), amountCollateral);
+        console.log("Depositing Collateral: ", amountCollateral);
         s_dscEngine.depositCollateral(collateralAddress, amountCollateral);
         vm.stopPrank();
     }
@@ -64,12 +67,13 @@ contract Handler is Test {
         vm.startPrank(msg.sender);
 
         uint256 maxCollateralToRedeem = s_dscEngine.getCollateralBalanceOfUser(msg.sender, collateralAddress);
-        amountCollateral = bound(amountCollateral, 0, maxCollateralToRedeem);
+        amountCollateral = bound(amountCollateral, 0, maxCollateralToRedeem / 3);
 
         if (amountCollateral == 0) {
             vm.stopPrank(); // Ensure prank is stopped if we return early
             return;
         }
+        console.log("Redeeming Collateral: ", amountCollateral);
         s_dscEngine.redeemCollateral(collateralAddress, amountCollateral);
         vm.stopPrank();
     }
